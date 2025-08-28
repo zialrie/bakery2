@@ -8,15 +8,21 @@ const PORT = 5000;
 app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 
+// Endpoint ambil semua user
 app.get('/api/db_user/user', async (req, res) => {
   try {
-    // Misal kamu punya tabel stats dengan kolom users, sales, revenue
-    const [rows] = await pool.query('SELECT nama, email, password FROM stats LIMIT 1');
-    if (rows.length > 0) {
-      res.json(rows[0]);
-    } else {
-      res.json({ nama: '', email: '', password: '' });
-    }
+    const [rows] = await pool.query('SELECT id, nama, email, password FROM users');
+    res.json(rows);
+  } catch (error) {
+    console.error('DB query error:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+// endpoint untuk menu
+app.get('/api/menu', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM menu');
+    res.json(rows);
   } catch (error) {
     console.error('DB query error:', error);
     res.status(500).json({ error: 'Database error' });

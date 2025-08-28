@@ -6,10 +6,9 @@ import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 
 export default function Home() {
-  // Hapus: const { darkMode } = useTheme();
-  // Kita ganti dengan tampilan selalu light mode
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [messages, setMessages] = useState([]); // state untuk menyimpan semua pesan
 
   // handle input
   const handleChange = (e) => {
@@ -21,6 +20,10 @@ export default function Home() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form Data:", formData);
+
+    // simpan pesan baru ke state messages
+    setMessages((prev) => [...prev, formData]);
+
     setIsSubmitted(true);
     setFormData({ name: "", email: "", message: "" });
   };
@@ -37,7 +40,7 @@ export default function Home() {
           <h1 className="text-4xl md:text-6xl font-bold leading-tight font-serif">
             Zeetri <span className="text-pink-500">Pastry</span>
           </h1>
-          <p className="mt-4 text-lg text-gray-600 font-style: italic"> La douceur dans chaque bouchée</p>
+          <p className="mt-4 text-lg text-gray-600 italic">Kenikmatan dalam setiap gigitan.</p>
         </div>
         <img
           src="src/img/zbV2-removebg-preview.png"
@@ -184,6 +187,24 @@ export default function Home() {
             </form>
           )}
         </div>
+      </section>
+
+      {/* Rating / Testimonial Section */}
+      <section id="rating" className="px-8 md:px-20 py-16 bg-yellow-50">
+        <h2 className="text-3xl font-bold text-center mb-6">Pesan dari Pengunjung</h2>
+        {messages.length === 0 ? (
+          <p className="text-center text-gray-600">Belum ada pesan.</p>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-6">
+            {messages.map((msg, index) => (
+              <div key={index} className="p-4 rounded-xl shadow bg-white">
+                <h3 className="font-semibold text-pink-500">{msg.name}</h3>
+                <p className="text-gray-600">{msg.message}</p>
+                <p className="text-sm text-gray-400">{msg.email}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

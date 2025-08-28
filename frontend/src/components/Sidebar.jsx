@@ -10,13 +10,13 @@ export default function Sidebar() {
 
   const menuItems = [
     { name: "Dashboard", icon: <Home size={18} />, path: "/dashboard-admin" },
-    { name: "Users", icon: <Users size={18} />, path: "/users" },
+    { name: "Users", icon: <Users size={18} />, path: "/dashboard-users" },
     { name: "Reports", icon: <FileText size={18} />, path: "/reports" },
   ];
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
   };
 
   return (

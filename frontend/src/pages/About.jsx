@@ -7,17 +7,17 @@ export default function About() {
 
           <div className="mb-8">
             <p className="text-lg leading-relaxed">
-              Kami adalah tim kreatif dan penuh semangat yang sedang menjelajahi dunia
-              pengembangan web menggunakan <strong>React</strong>. Berawal dari rasa penasaran
-              dan semangat belajar, kami membangun Zeetri Pastry sebagai proyek latihan yang
-              akhirnya menjadi lebih dari sekadar eksperimen—sebuah representasi dari kerja tim,
-              desain, dan kode yang penuh rasa.
+              Selamat datang di <strong>Zeetri Pastry</strong>  sebuah proyek kreatif yang lahir dari
+              perpaduan antara rasa penasaran pada dunia <strong>pengembangan web</strong> dan kecintaan
+              pada pastry. Apa yang awalnya hanya sekadar latihan coding, kini tumbuh menjadi sebuah
+              toko pastry virtual dengan tampilan modern dan penuh rasa manis.
             </p>
 
             <p className="mt-4 text-lg leading-relaxed">
-              Kami percaya bahwa belajar paling efektif adalah dengan praktik langsung. Maka,
-              kami menggabungkan konsep toko pastry virtual ini dengan teknologi modern, termasuk
-              <strong> React, Tailwind CSS,</strong> dan <strong>React Router</strong> untuk routing yang mulus.
+              Setiap detail di <strong>Zeetri Pastry</strong> kami bangun dengan semangat belajar sekaligus
+              menghadirkan pengalaman berbelanja pastry yang hangat dan menyenangkan. Didukung oleh teknologi
+              modern seperti <strong>React, Tailwind CSS</strong>, dan <strong>React Router</strong>, kami berusaha
+              menyajikan pengalaman yang lembut layaknya croissant, dan rapi layaknya susunan mille-feuille.
             </p>
           </div>
 
@@ -28,9 +28,9 @@ export default function About() {
           />
 
           <p className="mt-8 text-base">
-            🎯 Kami masih terus berkembang, dan kami sangat terbuka untuk kolaborasi dan saran.
-            Jika kamu tertarik untuk tahu lebih banyak atau ikut andil dalam perjalanan ini,
-            jangan ragu untuk menghubungi kami!
+            🎯 <strong>Visi kami</strong> sederhana: belajar, berkembang, dan berbagi. Kami sangat terbuka untuk
+            kolaborasi maupun ide segar. Jadi, jika kamu ingin ikut serta dalam perjalanan ini atau sekadar
+            berbagi saran, jangan ragu untuk menghubungi kami!
           </p>
 
           <p className="mt-6">
