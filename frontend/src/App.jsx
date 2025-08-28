@@ -15,7 +15,6 @@ import DashboardReport from "./pages/DashboardReports";
 import Pembayaran from "./pages/Pembayaran";
 import ProtectedRoute from "./pages/Protectedroute";
 import { CartProvider } from "./context/CartContext";
-import Rating from "./pages/Rating";
 
 
 // Layout untuk handle Navbar & Footer
@@ -37,7 +36,6 @@ function Layout() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/pembayaran" element={<Pembayaran />} />
-          <Route path="/rating" element={<Rating />} />
 
           {/* Lindungi route admin */}
           <Route
