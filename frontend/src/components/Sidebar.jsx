@@ -9,7 +9,7 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
-    { name: "Dashboard", icon: <Home size={18} />, path: "/dashboardadmin" },
+    { name: "Dashboard", icon: <Home size={18} />, path: "/dashboard-admin" },
     { name: "Users", icon: <Users size={18} />, path: "/users" },
     { name: "Reports", icon: <FileText size={18} />, path: "/reports" },
   ];

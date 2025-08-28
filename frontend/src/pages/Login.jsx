@@ -10,6 +10,7 @@ export default function Login() {
     e.preventDefault();
 
     const savedUser = JSON.parse(localStorage.getItem("user"));
+
     if (username === "admin" && password === "12345") {
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("user", JSON.stringify({
@@ -17,7 +18,7 @@ export default function Login() {
         password: "123",
         role: "admin"
       }));
-      navigate("/dashboardadmin");
+      navigate("/dashboard-admin");
       return;
     }
 
@@ -30,7 +31,7 @@ export default function Login() {
 
       // cek role
       if (savedUser.role === "admin") {
-        navigate("/dashboardadmin");
+        navigate("/dashboard-admin");
       } else {
         navigate("/"); // user biasa ke home
       }

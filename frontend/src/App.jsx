@@ -19,8 +19,8 @@ function Layout() {
   const location = useLocation();
 
   // Halaman yang tidak boleh menampilkan Navbar/Footer
-  const hideNavbarOn = ["/login", "/signup", "/pembayaran", "/dashboardadmin"];
-  const hideFooterOn = ["/dashboardadmin"];
+  const hideNavbarOn = ["/login", "/signup", "/pembayaran", "/dashboard-admin"];
+  const hideFooterOn = ["/dashboard-admin"];
 
   return (
     <>
@@ -36,7 +36,7 @@ function Layout() {
 
           {/* Lindungi route admin */}
           <Route
-            path="/dashboardadmin"
+            path="/dashboard-admin"
             element={
               <ProtectedRoute role="admin">
                 <DashboardAdmin />

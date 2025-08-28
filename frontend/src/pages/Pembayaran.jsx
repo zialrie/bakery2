@@ -1,79 +1,109 @@
+import React from "react";
 import { useCart } from "../context/CartContext";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
-export default function Pembayaran() {
-  const { cart, removeFromCart, clearCart } = useCart();
+const Pembayaran = () => {
+  const { cart, clearCart, totalPrice, removeFromCart } = useCart();
+  const navigate = useNavigate();
 
-  const total = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const handleCheckout = () => {
+    if (cart.length === 0) {
+      alert("Keranjang kosong!");
+      return;
+    }
 
-  const handlePayment = () => {
-    alert("Pembayaran berhasil! 🎉 Terima kasih sudah belanja.");
+    const newTransaction = {
+      orderId: "ORD-" + Date.now().toString().slice(-6),
+      transactionTime: new Date().toLocaleString("id-ID"),
+      items: cart.map((item) => ({
+        itemName: item.title,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      totalPrice,
+    };
+
+    const stored = JSON.parse(localStorage.getItem("transactionData")) || [];
+    localStorage.setItem("transactionData", JSON.stringify([newTransaction, ...stored]));
+
+    window.dispatchEvent(new CustomEvent("data-updated", { detail: { type: "transaction" } }));
+
     clearCart();
+
+    alert(`✅ Pembayaran berhasil!\nTotal: Rp ${totalPrice.toLocaleString("id-ID")}`);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-8 md:px-20 pt-24 py-16 bg-gradient-to-b from-yellow-50 to-pink-50">
-      {cart.length === 0 ? (
-        // ✅ Tampilan jika keranjang kosong
-        <div className="text-center bg-white p-10 rounded-xl shadow-md max-w-md w-full">
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Opss..</h2>
-          <p className="text-gray-600 mb-6">Pesanan kamu kosong nih</p>
-          <Link
-            to="/menu"
-            className="inline-block bg-red-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-600 transition"
-          >
-            Kembali ke Menu
-          </Link>
-        </div>
-      ) : (
-        // ✅ Tampilan jika ada item di keranjang
-        <div className="w-full space-y-6">
-          <h1 className="text-3xl font-bold text-center mb-10 font-serif">
-            Keranjang Belanja
-          </h1>
+    <div className="min-h-screen px-6 py-10 bg-gray-50">
+      <div className="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow">
+        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Pembayaran</h1>
 
-          {cart.map((item, index) => (
-            <div
-              key={index}
-              className="flex justify-between items-center bg-white p-4 rounded-xl shadow"
+        {cart.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-xl text-gray-600 mb-6">Keranjangnya masih kosong nih</p>
+            <button
+              onClick={() => navigate("/menu")}
+              className="px-6 py-3 bg-gradient-to-r from-pink-500 to-yellow-500 text-white rounded-lg hover:from-pink-600 hover:to-yellow-600 transition font-medium shadow"
             >
-              <div>
-                <h3 className="font-semibold">{item.title}</h3>
-                <p className="text-sm text-gray-600">
-                  Rp {item.price.toLocaleString()} x {item.qty}
-                </p>
-              </div>
+              🍞 Kembali ke Menu
+            </button>
+          </div>
+        ) : (
+          <>
+            <ul className="space-y-3 mb-6">
+              {cart.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex justify-between items-center p-3 bg-pink-50 rounded-lg border border-pink-100"
+                >
+                  <span className="font-medium text-gray-800">
+                    {item.title} × {item.quantity}
+                  </span>
+                  <div className="flex items-center space-x-4">
+                    <span className="font-bold text-green-600">
+                      Rp {(item.price * item.quantity).toLocaleString("id-ID")}
+                    </span>
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="text-red-600 hover:text-red-800 font-semibold"
+                      title="Hapus item"
+                    >
+                      Delete item?
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="border-t pt-4 mb-6">
+              <p className="text-xl font-bold text-right text-gray-800">
+                Total:{" "}
+                <span className="text-green-600">
+                  Rp {totalPrice.toLocaleString("id-ID")}
+                </span>
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
               <button
-                onClick={() => removeFromCart(item.title)}
-                className="text-red-500 hover:underline"
+                onClick={() => navigate(-1)}
+                className="py-3 px-6 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition font-medium"
               >
-                Hapus
+                ◀️ Kembali
+              </button>
+
+              <button
+                onClick={handleCheckout}
+                className="flex-1 py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition font-medium shadow"
+              >
+                💳 Bayar Sekarang
               </button>
             </div>
-          ))}
-
-          <div className="text-right font-bold text-xl text-pink-700">
-            Total: Rp {total.toLocaleString()}
-          </div>
-
-          <button
-            onClick={handlePayment}
-            className="w-full bg-pink-500 text-white py-3 rounded-lg hover:bg-pink-600 transition"
-          >
-            Lanjutkan Pembayaran
-          </button>
-
-          <p className="mt-6 text-center">
-            <Link
-              to="/menu"
-              className="text-pink-500 hover:underline font-medium transition"
-            >
-              ← Kembali ke Menu
-            </Link>
-          </p>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
-}
+};
+
+export default Pembayaran;

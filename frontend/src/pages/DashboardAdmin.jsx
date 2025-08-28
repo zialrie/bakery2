@@ -1,74 +1,63 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 
 const DashboardAdmin = () => {
-  // Data void seperti sebelumnya
-  const voidData = [
-    {
-      voidTime: '17 Dec 2019 13:39',
-      orderId: '6ZTLK67',
-      itemName: 'Black Coffee',
-      quantity: 1,
-      voidReason: 'Out of Stock',
-      executedBy: 'Ira Rahmahdani',
-      totalPrice: 48000
-    },
-    {
-      voidTime: '17 Dec 2019 13:39',
-      orderId: '6ZTLK67',
-      itemName: 'Latte Macchiato',
-      quantity: 1,
-      voidReason: 'Out of Stock',
-      executedBy: 'Ira Rahmahdani',
-      totalPrice: 55000
-    },
-    {
-      voidTime: '16 Dec 2019 18:19',
-      orderId: '5GJK767',
-      itemName: 'Affogato',
-      quantity: 3,
-      voidReason: 'Waiting too long',
-      executedBy: 'Febryan Sianipar',
-      totalPrice: 165000
-    },
-    {
-      voidTime: '10 Dec 2019 16:43',
-      orderId: '47&JUJ0',
-      itemName: 'Cafe au Lait',
-      quantity: 1,
-      voidReason: 'Entry Error',
-      executedBy: 'Jordy Timothy',
-      totalPrice: 65000
-    }
-  ];
 
-  // Dummy data transaksi berhasil
-  const transactionData = [
+  const defaultTransactionData = [
     {
       transactionTime: '18 Dec 2019 10:15',
       orderId: '9FJH767',
-      itemName: 'Espresso',
-      quantity: 2,
+      items: [{ itemName: 'Espresso', quantity: 2, price: 45000 }],
       totalPrice: 90000
-    },
-    {
-      transactionTime: '18 Dec 2019 11:00',
-      orderId: '8DKL564',
-      itemName: 'Cappuccino',
-      quantity: 1,
-      totalPrice: 50000
-    },
-    {
-      transactionTime: '17 Dec 2019 14:00',
-      orderId: '6ZTLK67',
-      itemName: 'Mocha',
-      quantity: 1,
-      totalPrice: 60000
     }
   ];
 
-  // Hitung total omset dari transaksi berhasil
-  const totalOmset = transactionData.reduce((sum, item) => sum + item.totalPrice, 0);
+  const [transactionData, setTransactionData] = useState([]);
+
+  // 🔁 SAFE version - fallback empty array
+  const flattenedTransactions = transactionData.flatMap(trans =>
+    (trans.items || []).map(item => ({
+      transactionTime: trans.transactionTime,
+      orderId: trans.orderId,
+      itemName: item.itemName,
+      quantity: item.quantity,
+      totalPrice: item.quantity * item.price
+    }))
+  );
+
+  const totalOmset = transactionData.reduce((sum, t) => sum + t.totalPrice, 0);
+
+  const loadData = () => {
+    const load = (key, defaultValue) => {
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : defaultValue;
+    };
+
+    setTransactionData(load('transactionData', defaultTransactionData));
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'transactionData') {
+        loadData();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadData();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const thStyle = {
     padding: '12px',
@@ -86,79 +75,40 @@ const DashboardAdmin = () => {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar */}
       <Sidebar />
-
-      {/* Main Content */}
       <div
         style={{
           flex: 1,
           padding: '2rem',
           backgroundColor: '#f8fafc',
-          marginLeft: '250px', // <-- margin supaya gak ketutupan sidebar
-          minWidth: 0 // agar child flex bisa shrink
+          marginLeft: '250px'
         }}
       >
-        <h1 style={{ marginBottom: '1rem' }}>Admin Dashboard</h1>
+        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
+          Admin Dashboard
+        </h1>
 
-        {/* Omset Section */}
+        {/* Omset Hari Ini */}
         <div
           style={{
             marginBottom: '2rem',
-            padding: '1rem',
+            padding: '1.5rem',
             backgroundColor: '#fff',
             borderRadius: '8px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             maxWidth: '300px'
           }}
         >
-          <h2>Omset Hari Ini</h2>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-            Rp. {totalOmset.toLocaleString('id-ID')}
+          <h2 style={{ color: '#64748b' }}>Omset Hari Ini</h2>
+          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#059669' }}>
+            Rp {totalOmset.toLocaleString('id-ID')}
           </p>
         </div>
 
-        {/* Void Transactions */}
-        <h2 style={{ marginBottom: '0.5rem' }}>Void Transactions</h2>
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            backgroundColor: '#fff',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            marginBottom: '3rem'
-          }}
-        >
-          <thead>
-            <tr>
-              <th style={thStyle}>Void Time</th>
-              <th style={thStyle}>Order Id</th>
-              <th style={thStyle}>Item Name</th>
-              <th style={thStyle}>Quantity</th>
-              <th style={thStyle}>Void Reason</th>
-              <th style={thStyle}>Executed by</th>
-              <th style={thStyle}>Total Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {voidData.map((item, index) => (
-              <tr key={index}>
-                <td style={tdStyle}>{item.voidTime}</td>
-                <td style={tdStyle}>{item.orderId}</td>
-                <td style={tdStyle}>{item.itemName}</td>
-                <td style={tdStyle}>{item.quantity}</td>
-                <td style={tdStyle}>{item.voidReason}</td>
-                <td style={tdStyle}>{item.executedBy}</td>
-                <td style={tdStyle}>Rp. {item.totalPrice.toLocaleString('id-ID')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Transaction History */}
-        <h2 style={{ marginBottom: '0.5rem' }}>Riwayat Transaksi</h2>
+        {/* Riwayat Transaksi */}
+        <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem' }}>
+          Riwayat Transaksi
+        </h2>
         <table
           style={{
             width: '100%',
@@ -171,21 +121,21 @@ const DashboardAdmin = () => {
         >
           <thead>
             <tr>
-              <th style={thStyle}>Transaction Time</th>
-              <th style={thStyle}>Order Id</th>
-              <th style={thStyle}>Item Name</th>
-              <th style={thStyle}>Quantity</th>
-              <th style={thStyle}>Total Price</th>
+              <th style={thStyle}>Waktu</th>
+              <th style={thStyle}>Order ID</th>
+              <th style={thStyle}>Item</th>
+              <th style={thStyle}>Qty</th>
+              <th style={thStyle}>Total</th>
             </tr>
           </thead>
           <tbody>
-            {transactionData.map((item, index) => (
-              <tr key={index}>
-                <td style={tdStyle}>{item.transactionTime}</td>
-                <td style={tdStyle}>{item.orderId}</td>
-                <td style={tdStyle}>{item.itemName}</td>
-                <td style={tdStyle}>{item.quantity}</td>
-                <td style={tdStyle}>Rp. {item.totalPrice.toLocaleString('id-ID')}</td>
+            {flattenedTransactions.map((t, i) => (
+              <tr key={i}>
+                <td style={tdStyle}>{t.transactionTime}</td>
+                <td style={tdStyle}>{t.orderId}</td>
+                <td style={tdStyle}>{t.itemName}</td>
+                <td style={tdStyle}>{t.quantity}</td>
+                <td style={tdStyle}>Rp {t.totalPrice.toLocaleString('id-ID')}</td>
               </tr>
             ))}
           </tbody>
