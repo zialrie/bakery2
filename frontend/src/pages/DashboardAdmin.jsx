@@ -2,31 +2,31 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 
 const DashboardAdmin = () => {
-
   const defaultTransactionData = [
     {
-      transactionTime: '18 Dec 2019 10:15',
-      orderId: '9FJH767',
-      items: [{ itemName: 'Espresso', quantity: 2, price: 45000 }],
-      totalPrice: 90000
-    }
+    },
   ];
 
   const [transactionData, setTransactionData] = useState([]);
+  const [dailyOmset, setDailyOmset] = useState({}); // { "2025-08-28": 150000, "2025-08-27": 200000 }
 
-  // 🔁 SAFE version - fallback empty array
-  const flattenedTransactions = transactionData.flatMap(trans =>
-    (trans.items || []).map(item => ({
+  const todayKey = new Date().toISOString().slice(0, 10); // contoh: "2025-08-28"
+
+  // 🔁 Flatten transaksi
+  const flattenedTransactions = transactionData.flatMap((trans) =>
+    (trans.items || []).map((item) => ({
       transactionTime: trans.transactionTime,
       orderId: trans.orderId,
       itemName: item.itemName,
       quantity: item.quantity,
-      totalPrice: item.quantity * item.price
+      totalPrice: item.quantity * item.price,
     }))
   );
 
-  const totalOmset = transactionData.reduce((sum, t) => sum + t.totalPrice, 0);
+  // Hitung omset dari transaksi yg ada
+  const todayOmset = transactionData.reduce((sum, t) => sum + t.totalPrice, 0);
 
+  // Load dari localStorage
   const loadData = () => {
     const load = (key, defaultValue) => {
       const saved = localStorage.getItem(key);
@@ -34,6 +34,22 @@ const DashboardAdmin = () => {
     };
 
     setTransactionData(load('transactionData', defaultTransactionData));
+    setDailyOmset(load('dailyOmset', {}));
+  };
+
+  // Save ke localStorage
+  const saveDailyOmset = (newData) => {
+    setDailyOmset(newData);
+    localStorage.setItem('dailyOmset', JSON.stringify(newData));
+  };
+
+  // Update omset per hari
+  const updateDailyOmset = () => {
+    setDailyOmset((prev) => {
+      const updated = { ...prev, [todayKey]: todayOmset };
+      localStorage.setItem('dailyOmset', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   useEffect(() => {
@@ -42,7 +58,7 @@ const DashboardAdmin = () => {
 
   useEffect(() => {
     const handleStorage = (e) => {
-      if (e.key === 'transactionData') {
+      if (e.key === 'transactionData' || e.key === 'dailyOmset') {
         loadData();
       }
     };
@@ -51,26 +67,35 @@ const DashboardAdmin = () => {
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
+  // tiap 3 detik reload data + update omset harian
   useEffect(() => {
     const interval = setInterval(() => {
       loadData();
+      updateDailyOmset();
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [todayOmset]);
+
+  // Ambil omset kemarin
+  const yesterdayKey = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const yesterdayOmset = dailyOmset[yesterdayKey] || 0;
+
+  // Hitung total omset all time
+  const totalOmsetAllTime = Object.values(dailyOmset).reduce((a, b) => a + b, 0);
 
   const thStyle = {
     padding: '12px',
     fontWeight: 'bold',
     borderBottom: '1px solid #e2e8f0',
     textAlign: 'left',
-    backgroundColor: '#f1f5f9'
+    backgroundColor: '#f1f5f9',
   };
 
   const tdStyle = {
     padding: '12px',
     borderBottom: '1px solid #e2e8f0',
-    color: '#334155'
+    color: '#334155',
   };
 
   return (
@@ -81,12 +106,10 @@ const DashboardAdmin = () => {
           flex: 1,
           padding: '2rem',
           backgroundColor: '#f8fafc',
-          marginLeft: '250px'
+          marginLeft: '250px',
         }}
       >
-        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-          Admin Dashboard
-        </h1>
+        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Admin Dashboard</h1>
 
         {/* Omset Hari Ini */}
         <div
@@ -96,12 +119,46 @@ const DashboardAdmin = () => {
             backgroundColor: '#fff',
             borderRadius: '8px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            maxWidth: '300px'
+            maxWidth: '350px',
           }}
         >
           <h2 style={{ color: '#64748b' }}>Omset Hari Ini</h2>
           <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#059669' }}>
-            Rp {totalOmset.toLocaleString('id-ID')}
+            Rp {todayOmset.toLocaleString('id-ID')}
+          </p>
+        </div>
+
+        {/* Omset Kemarin */}
+        <div
+          style={{
+            marginBottom: '2rem',
+            padding: '1.5rem',
+            backgroundColor: '#fff',
+            borderRadius: '8px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            maxWidth: '350px',
+          }}
+        >
+          <h2 style={{ color: '#64748b' }}>Omset Kemarin</h2>
+          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2563eb' }}>
+            Rp {yesterdayOmset.toLocaleString('id-ID')}
+          </p>
+        </div>
+
+        {/* Total Omset All Time */}
+        <div
+          style={{
+            marginBottom: '2rem',
+            padding: '1.5rem',
+            backgroundColor: '#fff',
+            borderRadius: '8px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            maxWidth: '350px',
+          }}
+        >
+          <h2 style={{ color: '#64748b' }}>Total Omset Keseluruhan</h2>
+          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#d97706' }}>
+            Rp {totalOmsetAllTime.toLocaleString('id-ID')}
           </p>
         </div>
 
@@ -116,7 +173,7 @@ const DashboardAdmin = () => {
             backgroundColor: '#fff',
             borderRadius: '8px',
             overflow: 'hidden',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           }}
         >
           <thead>
