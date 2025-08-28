@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../index.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -10,6 +10,14 @@ export default function Home() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [messages, setMessages] = useState([]); // state untuk menyimpan semua pesan
 
+  // load messages dari localStorage saat pertama kali render
+  useEffect(() => {
+    const storedMessages = localStorage.getItem("messages");
+    if (storedMessages) {
+      setMessages(JSON.parse(storedMessages));
+    }
+  }, []);
+
   // handle input
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,10 +27,14 @@ export default function Home() {
   // handle submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
+    
+    const newMessages = [...messages, formData];
 
-    // simpan pesan baru ke state messages
-    setMessages((prev) => [...prev, formData]);
+    // update state messages
+    setMessages(newMessages);
+
+    // simpan ke localStorage supaya tetap ada saat refresh
+    localStorage.setItem("messages", JSON.stringify(newMessages));
 
     setIsSubmitted(true);
     setFormData({ name: "", email: "", message: "" });
@@ -65,24 +77,23 @@ export default function Home() {
       <section id="menu" className="px-8 md:px-20 py-16 bg-gradient-to-b from-pink-50 to-yellow-50">
         <h2 className="text-3xl font-bold text-center mb-10">Menu Favorite</h2>
         <div className="grid md:grid-cols-3 gap-8">
-          {[
-            {
+          {[{
               title: "Butter Croissant",
               desc: "Renyah di luar, lembut di dalam, sempurna dengan secangkir kopi.",
               img: "src/img/bakery.jpg",
-              price: "$304",
+              price: "Rp. 30.000",
             },
             {
               title: "Chocolate Cake",
               desc: "Kue cokelat lembut dengan topping premium.",
               img: "src/img/coklatkek.jpg",
-              price: "$132",
+              price: "Rp. 132.000",
             },
             {
               title: "Cheese Cake",
               desc: "Kue keju lembut dengan topping premium.",
               img: "src/img/ciskek.jpg",
-              price: "$223",
+              price: "Rp. 223.000",
             },
           ].map((item, index) => (
             <div
@@ -119,7 +130,7 @@ export default function Home() {
         {/* WhatsApp Button */}
         <div className="flex justify-center mb-10">
           <a
-            href="https://wa.me/6281234567890"
+            href="https://wa.me/62977755356"
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-xl shadow hover:bg-green-600 transition"
@@ -130,81 +141,6 @@ export default function Home() {
             Chat via WhatsApp
           </a>
         </div>
-
-        {/* Contact Form */}
-        <div className="max-w-2xl mx-auto">
-          <h3 className="text-2xl font-semibold text-center mb-6">
-            Atau isi formulir di bawah
-          </h3>
-          {isSubmitted ? (
-            <p className="text-center text-green-500 font-medium">
-              Pesan Anda berhasil dikirim! Terima kasih.
-            </p>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium mb-1">Nama Lengkap</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-pink-500 outline-none transition bg-white border-gray-300 text-gray-800"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-pink-500 outline-none transition bg-white border-gray-300 text-gray-800"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Pesan</label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  rows="4"
-                  required
-                  className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-pink-500 outline-none transition bg-white border-gray-300 text-gray-800"
-                  placeholder="Tuliskan pesan Anda..."
-                ></textarea>
-              </div>
-              <div className="text-center">
-                <button
-                  type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-xl shadow hover:from-pink-600 hover:to-orange-500 transition"
-                >
-                  Kirim Pesan
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      </section>
-
-      {/* Rating / Testimonial Section */}
-      <section id="rating" className="px-8 md:px-20 py-16 bg-yellow-50">
-        <h2 className="text-3xl font-bold text-center mb-6">Pesan dari Pengunjung</h2>
-        {messages.length === 0 ? (
-          <p className="text-center text-gray-600">Belum ada pesan.</p>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-6">
-            {messages.map((msg, index) => (
-              <div key={index} className="p-4 rounded-xl shadow bg-white">
-                <h3 className="font-semibold text-pink-500">{msg.name}</h3>
-                <p className="text-gray-600">{msg.message}</p>
-                <p className="text-sm text-gray-400">{msg.email}</p>
-              </div>
-            ))}
-          </div>
-        )}
       </section>
     </div>
   );
