@@ -2,17 +2,29 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 
 const DashboardAdmin = () => {
-  const defaultTransactionData = [
-    {
-    },
-  ];
+  const [adminName, setAdminName] = useState('Admin');
 
+  const defaultTransactionData = [{}];
   const [transactionData, setTransactionData] = useState([]);
-  const [dailyOmset, setDailyOmset] = useState({}); // { "2025-08-28": 150000, "2025-08-27": 200000 }
+  const [dailyOmset, setDailyOmset] = useState({});
 
-  const todayKey = new Date().toISOString().slice(0, 10); // contoh: "2025-08-28"
+  const todayKey = new Date().toISOString().slice(0, 10);
 
-  // 🔁 Flatten transaksi
+  // Ambil nama admin dari localStorage
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem('adminData');
+    if (savedAdmin) {
+      try {
+        const parsed = JSON.parse(savedAdmin);
+        if (parsed.nama) {
+          setAdminName(parsed.nama);
+        }
+      } catch (err) {
+        console.error('Gagal parsing adminData:', err);
+      }
+    }
+  }, []);
+
   const flattenedTransactions = transactionData.flatMap((trans) =>
     (trans.items || []).map((item) => ({
       transactionTime: trans.transactionTime,
@@ -23,10 +35,8 @@ const DashboardAdmin = () => {
     }))
   );
 
-  // Hitung omset dari transaksi yg ada
   const todayOmset = transactionData.reduce((sum, t) => sum + t.totalPrice, 0);
 
-  // Load dari localStorage
   const loadData = () => {
     const load = (key, defaultValue) => {
       const saved = localStorage.getItem(key);
@@ -37,13 +47,6 @@ const DashboardAdmin = () => {
     setDailyOmset(load('dailyOmset', {}));
   };
 
-  // Save ke localStorage
-  const saveDailyOmset = (newData) => {
-    setDailyOmset(newData);
-    localStorage.setItem('dailyOmset', JSON.stringify(newData));
-  };
-
-  // Update omset per hari
   const updateDailyOmset = () => {
     setDailyOmset((prev) => {
       const updated = { ...prev, [todayKey]: todayOmset };
@@ -67,7 +70,6 @@ const DashboardAdmin = () => {
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  // tiap 3 detik reload data + update omset harian
   useEffect(() => {
     const interval = setInterval(() => {
       loadData();
@@ -77,11 +79,8 @@ const DashboardAdmin = () => {
     return () => clearInterval(interval);
   }, [todayOmset]);
 
-  // Ambil omset kemarin
   const yesterdayKey = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
   const yesterdayOmset = dailyOmset[yesterdayKey] || 0;
-
-  // Hitung total omset all time
   const totalOmsetAllTime = Object.values(dailyOmset).reduce((a, b) => a + b, 0);
 
   const thStyle = {
@@ -109,41 +108,12 @@ const DashboardAdmin = () => {
           marginLeft: '250px',
         }}
       >
+        {/* 🟢 Sapa Admin */}
+        <div style={{ marginBottom: '1rem', fontSize: '1.1rem', color: '#1e293b' }}>
+          👋 Selamat datang, <strong>{adminName}</strong>!
+        </div>
+
         <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Admin Dashboard</h1>
-
-        {/* Omset Hari Ini */}
-        <div
-          style={{
-            marginBottom: '2rem',
-            padding: '1.5rem',
-            backgroundColor: '#fff',
-            borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            maxWidth: '350px',
-          }}
-        >
-          <h2 style={{ color: '#64748b' }}>Omset Hari Ini</h2>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#059669' }}>
-            Rp {todayOmset.toLocaleString('id-ID')}
-          </p>
-        </div>
-
-        {/* Omset Kemarin */}
-        <div
-          style={{
-            marginBottom: '2rem',
-            padding: '1.5rem',
-            backgroundColor: '#fff',
-            borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            maxWidth: '350px',
-          }}
-        >
-          <h2 style={{ color: '#64748b' }}>Omset Kemarin</h2>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2563eb' }}>
-            Rp {yesterdayOmset.toLocaleString('id-ID')}
-          </p>
-        </div>
 
         {/* Total Omset All Time */}
         <div
@@ -162,10 +132,8 @@ const DashboardAdmin = () => {
           </p>
         </div>
 
-        {/* Riwayat Transaksi */}
-        <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem' }}>
-          Riwayat Transaksi
-        </h2>
+        {/* Tabel Riwayat Transaksi */}
+        <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem' }}>Riwayat Transaksi</h2>
         <table
           style={{
             width: '100%',
