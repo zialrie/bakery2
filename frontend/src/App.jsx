@@ -11,10 +11,10 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import DashboardAdmin from "./pages/DashboardAdmin";
 import DashboardUsers from "./pages/DashboardUsers";
+import DashboardReport from "./pages/DashboardReports";
 import Pembayaran from "./pages/Pembayaran";
 import ProtectedRoute from "./pages/Protectedroute";
 import { CartProvider } from "./context/CartContext";
-import Rating from "./pages/Rating";
 
 
 // Layout untuk handle Navbar & Footer
@@ -22,8 +22,8 @@ function Layout() {
   const location = useLocation();
 
   // Halaman yang tidak menampilkan Navbar/Footer
-  const hideNavbarOn = ["/login", "/signup", "/pembayaran", "/dashboard-admin", "/dashboard-users"];
-  const hideFooterOn = ["/login", "/dashboard-admin", "/dashboard-users", "/signup", "/pembayaran", "/menu"];
+  const hideNavbarOn = ["/login", "/signup", "/pembayaran", "/dashboard-admin", "/dashboard-users", "/dashboard-reports"];
+  const hideFooterOn = ["/login", "/dashboard-admin", "/dashboard-users", "/dashboard-reports", "/signup", "/pembayaran", "/menu"];
 
   return (
     <>
@@ -36,7 +36,6 @@ function Layout() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/pembayaran" element={<Pembayaran />} />
-          <Route path="/rating" element={<Rating />} />
 
           {/* Lindungi route admin */}
           <Route
@@ -55,6 +54,11 @@ function Layout() {
               </ProtectedRoute>
             }
           />
+          <Route path="/dashboard-reports" element={
+            <ProtectedRoute role="admin">
+              <DashboardReport />
+            </ProtectedRoute>
+          } />
         </Routes>
       </div>
       {!hideFooterOn.includes(location.pathname) && <Footer />}

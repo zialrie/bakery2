@@ -2,30 +2,40 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 
 const DashboardAdmin = () => {
+  const [adminName, setAdminName] = useState('Admin');
 
-  const defaultTransactionData = [
-    {
-      transactionTime: '18 Dec 2019 10:15',
-      orderId: '9FJH767',
-      items: [{ itemName: 'Espresso', quantity: 2, price: 45000 }],
-      totalPrice: 90000
-    }
-  ];
-
+  const defaultTransactionData = [{}];
   const [transactionData, setTransactionData] = useState([]);
+  const [dailyOmset, setDailyOmset] = useState({});
 
-  // 🔁 SAFE version - fallback empty array
-  const flattenedTransactions = transactionData.flatMap(trans =>
-    (trans.items || []).map(item => ({
+  const todayKey = new Date().toISOString().slice(0, 10);
+
+  // Ambil nama admin dari localStorage
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem('adminData');
+    if (savedAdmin) {
+      try {
+        const parsed = JSON.parse(savedAdmin);
+        if (parsed.nama) {
+          setAdminName(parsed.nama);
+        }
+      } catch (err) {
+        console.error('Gagal parsing adminData:', err);
+      }
+    }
+  }, []);
+
+  const flattenedTransactions = transactionData.flatMap((trans) =>
+    (trans.items || []).map((item) => ({
       transactionTime: trans.transactionTime,
       orderId: trans.orderId,
       itemName: item.itemName,
       quantity: item.quantity,
-      totalPrice: item.quantity * item.price
+      totalPrice: item.quantity * item.price,
     }))
   );
 
-  const totalOmset = transactionData.reduce((sum, t) => sum + t.totalPrice, 0);
+  const todayOmset = transactionData.reduce((sum, t) => sum + t.totalPrice, 0);
 
   const loadData = () => {
     const load = (key, defaultValue) => {
@@ -34,6 +44,15 @@ const DashboardAdmin = () => {
     };
 
     setTransactionData(load('transactionData', defaultTransactionData));
+    setDailyOmset(load('dailyOmset', {}));
+  };
+
+  const updateDailyOmset = () => {
+    setDailyOmset((prev) => {
+      const updated = { ...prev, [todayKey]: todayOmset };
+      localStorage.setItem('dailyOmset', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   useEffect(() => {
@@ -42,7 +61,7 @@ const DashboardAdmin = () => {
 
   useEffect(() => {
     const handleStorage = (e) => {
-      if (e.key === 'transactionData') {
+      if (e.key === 'transactionData' || e.key === 'dailyOmset') {
         loadData();
       }
     };
@@ -54,23 +73,28 @@ const DashboardAdmin = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       loadData();
+      updateDailyOmset();
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [todayOmset]);
+
+  const yesterdayKey = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const yesterdayOmset = dailyOmset[yesterdayKey] || 0;
+  const totalOmsetAllTime = Object.values(dailyOmset).reduce((a, b) => a + b, 0);
 
   const thStyle = {
     padding: '12px',
     fontWeight: 'bold',
     borderBottom: '1px solid #e2e8f0',
     textAlign: 'left',
-    backgroundColor: '#f1f5f9'
+    backgroundColor: '#f1f5f9',
   };
 
   const tdStyle = {
     padding: '12px',
     borderBottom: '1px solid #e2e8f0',
-    color: '#334155'
+    color: '#334155',
   };
 
   return (
@@ -81,14 +105,17 @@ const DashboardAdmin = () => {
           flex: 1,
           padding: '2rem',
           backgroundColor: '#f8fafc',
-          marginLeft: '250px'
+          marginLeft: '250px',
         }}
       >
-        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-          Admin Dashboard
-        </h1>
+        {/* 🟢 Sapa Admin */}
+        <div style={{ marginBottom: '1rem', fontSize: '1.1rem', color: '#1e293b' }}>
+          👋 Selamat datang, <strong>{adminName}</strong>!
+        </div>
 
-        {/* Omset Hari Ini */}
+        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Admin Dashboard</h1>
+
+        {/* Total Omset All Time */}
         <div
           style={{
             marginBottom: '2rem',
@@ -96,19 +123,17 @@ const DashboardAdmin = () => {
             backgroundColor: '#fff',
             borderRadius: '8px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            maxWidth: '300px'
+            maxWidth: '350px',
           }}
         >
-          <h2 style={{ color: '#64748b' }}>Omset Hari Ini</h2>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#059669' }}>
-            Rp {totalOmset.toLocaleString('id-ID')}
+          <h2 style={{ color: '#64748b' }}>Total Omset Keseluruhan</h2>
+          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#d97706' }}>
+            Rp {totalOmsetAllTime.toLocaleString('id-ID')}
           </p>
         </div>
 
-        {/* Riwayat Transaksi */}
-        <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem' }}>
-          Riwayat Transaksi
-        </h2>
+        {/* Tabel Riwayat Transaksi */}
+        <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem' }}>Riwayat Transaksi</h2>
         <table
           style={{
             width: '100%',
@@ -116,7 +141,7 @@ const DashboardAdmin = () => {
             backgroundColor: '#fff',
             borderRadius: '8px',
             overflow: 'hidden',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           }}
         >
           <thead>
